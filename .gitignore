@@ -1,0 +1,4 @@
+go.sum
+logger.log
+/assets/
+.env
