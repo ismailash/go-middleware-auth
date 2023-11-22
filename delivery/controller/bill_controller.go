@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"enigmacamp.com/be-enigma-laundry/delivery/middleware"
 	"enigmacamp.com/be-enigma-laundry/model/dto"
 	"enigmacamp.com/be-enigma-laundry/usecase"
 	"enigmacamp.com/be-enigma-laundry/utils/common"
@@ -10,8 +11,9 @@ import (
 )
 
 type BillController struct {
-	uc usecase.BillUseCase
-	rg *gin.RouterGroup
+	uc             usecase.BillUseCase
+	rg             *gin.RouterGroup
+	authMiddleware middleware.AuthMiddleware
 }
 
 func (b *BillController) createHandler(ctx *gin.Context) {
@@ -47,11 +49,11 @@ func (b *BillController) getHandler(ctx *gin.Context) {
 }
 
 func (b *BillController) Route() {
-	br := b.rg.Group("/bills")
+	br := b.rg.Group("/bills", b.authMiddleware.RequireToken("admin", "employee"))
 	br.POST("/", b.createHandler)
 	br.GET("/:id", b.getHandler)
 }
 
-func NewBillController(uc usecase.BillUseCase, rg *gin.RouterGroup) *BillController {
-	return &BillController{uc: uc, rg: rg}
+func NewBillController(uc usecase.BillUseCase, rg *gin.RouterGroup, authMiddleware middleware.AuthMiddleware) *BillController {
+	return &BillController{uc: uc, rg: rg, authMiddleware: authMiddleware}
 }

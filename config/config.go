@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -24,10 +25,17 @@ type LogFileConfig struct {
 	FilePath string
 }
 
+type TokenConfig struct {
+	IssuerName      string
+	JwtSignatureKey []byte
+	JwtLifeTime     time.Duration
+}
+
 type Config struct {
 	ApiConfig
 	DbConfig
 	LogFileConfig
+	TokenConfig
 }
 
 func (c *Config) readConfig() error {
