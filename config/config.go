@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -56,6 +57,17 @@ func (c *Config) readConfig() error {
 	}
 
 	c.LogFileConfig = LogFileConfig{FilePath: os.Getenv("LOG_FILE")}
+
+	tokenLifeTime, err := strconv.Atoi(os.Getenv("TOKEN_LIFE_TIME"))
+	if err != nil {
+		return err
+	}
+
+	c.TokenConfig = TokenConfig{
+		IssuerName:      os.Getenv("TOKEN_ISSUE_NAME"),
+		JwtSignatureKey: []byte(os.Getenv("TOKEN_KEY")),
+		JwtLifeTime:     time.Duration(tokenLifeTime) * time.Hour,
+	}
 
 	if c.ApiPort == "" || c.Host == "" || c.Port == "" || c.Name == "" || c.User == "" {
 		return errors.New("environment required")

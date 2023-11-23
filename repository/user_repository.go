@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"enigmacamp.com/be-enigma-laundry/model"
@@ -40,8 +41,10 @@ func (u *userRepository) Create(payload model.User) (model.User, error) {
 }
 
 func (u *userRepository) GetByUsername(username string) (model.User, error) {
+	fmt.Println()
 	var user model.User
-	err := u.db.QueryRow(`SELECT id, name, email, username, password, role FROM users WHERE username = $1 OR email $1`, username).Scan(&user.Id, &user.Email, &user.Username, &user.Password, &user.Role)
+
+	err := u.db.QueryRow(`SELECT id, name, email, username, password, role FROM users WHERE username = $1 OR email = $1`, username).Scan(&user.Id, &user.Name, &user.Email, &user.Username, &user.Password, &user.Role)
 
 	if err != nil {
 		return model.User{}, err
