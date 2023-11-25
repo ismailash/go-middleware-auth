@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"enigmacamp.com/be-enigma-laundry/utils/common"
 	"time"
 
 	"enigmacamp.com/be-enigma-laundry/model"
@@ -23,7 +24,7 @@ func (b *billRepository) Create(payload model.Bill) (model.Bill, error) {
 	}
 
 	var bill model.Bill
-	err = tx.QueryRow(`INSERT INTO bills (bill_date,customer_id,user_id,updated_at) VALUES ($1,$2,$3,$4) RETURNING id,bill_date,created_at,updated_at`,
+	err = tx.QueryRow(common.CreateBill,
 		time.Now(), payload.Customer.Id, payload.User.Id, time.Now()).
 		Scan(
 			&bill.Id,
@@ -39,7 +40,7 @@ func (b *billRepository) Create(payload model.Bill) (model.Bill, error) {
 	var billDetails []model.BillDetail
 	for _, v := range payload.BillDetails {
 		var billDetail model.BillDetail
-		err = tx.QueryRow(`INSERT INTO bill_details (bill_id,product_id,qty,price,updated_at) VALUES ($1,$2,$3,$4,$5) RETURNING id,qty,price,created_at,updated_at`,
+		err = tx.QueryRow(common.CreateBillDetail,
 			bill.Id, v.Product.Id, v.Qty, v.Price, time.Now()).
 			Scan(
 				&billDetail.Id,
@@ -67,33 +68,7 @@ func (b *billRepository) Create(payload model.Bill) (model.Bill, error) {
 
 func (b *billRepository) Get(id string) (model.Bill, error) {
 	var bill model.Bill
-	err := b.db.QueryRow(`
-	SELECT
-		b.id,
-		b.bill_date,
-		c.id,
-		c.name,
-		c.phone_number,
-		c.address,
-		c.created_at,
-		c.updated_at,
-		u.id,
-		u.name,
-		u.email,
-		u.username,
-		u.role,
-		u.created_at,
-		u.updated_at,
-		b.created_at,
-		b.updated_at
-	FROM
-		bills b
-	JOIN customers c ON
-		c.id = b.customer_id
-	JOIN users u ON
-		u.id = b.user_id
-	WHERE b.id = $1
-	`, id).Scan(
+	err := b.db.QueryRow(common.GetBillById, id).Scan(
 		&bill.Id,
 		&bill.BillDate,
 		&bill.Customer.Id,
@@ -118,28 +93,7 @@ func (b *billRepository) Get(id string) (model.Bill, error) {
 	}
 
 	var billDetails []model.BillDetail
-	rows, err := b.db.Query(`
-	SELECT
-		bd.id,
-		p.id,
-		p."name",
-		p.price,
-		p."type",
-		p.created_at,
-		p.updated_at,
-		bd.qty,
-		bd.price,
-		bd.created_at,
-		bd.updated_at
-	FROM
-		bill_details bd
-	JOIN bills b ON
-		b.id = bd.bill_id
-	JOIN products p ON
-		p.id = bd.product_id
-	WHERE
-		b.id = $1
-	`, bill.Id)
+	rows, err := b.db.Query(common.GetBillDetailById, bill.Id)
 
 	if err != nil {
 		return model.Bill{}, err
