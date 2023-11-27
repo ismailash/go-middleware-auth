@@ -5,7 +5,6 @@ import (
 	usecasemock "enigmacamp.com/be-enigma-laundry/mock/usecase_mock"
 	"enigmacamp.com/be-enigma-laundry/model"
 	"enigmacamp.com/be-enigma-laundry/model/dto"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"testing"
@@ -46,6 +45,8 @@ var dummyBill = model.Bill{
 	},
 	BillDetails: []model.BillDetail{
 		{
+			Id:     "1",
+			BillId: "1",
 			Product: model.Product{
 				Id:    "1",
 				Name:  "Cuci + Setrika",
@@ -86,12 +87,11 @@ func (suite *BillUseCaseTestSuite) TestRegisterNewBill_Success() {
 	mockNewBillPayload := model.Bill{
 		Customer:    dummyBill.Customer,
 		User:        dummyBill.User,
-		BillDetails: dummyBill.BillDetails,
+		BillDetails: mockBillDetails,
 	}
 
 	// EKSEKUSI
 	suite.brm.On("Create", mockNewBillPayload).Return(dummyBill, nil)
-	fmt.Println("DISINI BOSSSS >>>> ", mockPayload)
 	_, err := suite.bu.RegisterNewBill(mockPayload)
 
 	// ASSERT
